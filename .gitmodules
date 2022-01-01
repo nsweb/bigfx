@@ -7,3 +7,6 @@
 [submodule "3rdparty/bimg"]
 	path = 3rdparty/bimg
 	url = https://github.com/bkaradzic/bimg.git
+[submodule "3rdparty/jsmn"]
+	path = 3rdparty/jsmn
+	url = https://github.com/zserge/jsmn.git
