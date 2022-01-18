@@ -38,16 +38,23 @@ function createBigfxProject(_bigfxpath)
     files { _bigfxpath .. "/src/**.h", _bigfxpath .. "/src/**.cpp" }
 
     local thirdpartypath = _bigfxpath .. "/3rdparty"
+    local bimgpath = thirdpartypath .. "/bimg"
     local bxpath = thirdpartypath .. "/bx"
+    local bgfxpath = thirdpartypath .. "/bgfx"
     includedirs {
-                --PROJ_DIR .. "/3rdparty/SDL2-2.0.16/include",
-                --PROJ_DIR .. "/3rdparty/glew-2.1.0/include",
-                thirdpartypath .. "/zlib-1.2.11",
-                thirdpartypath .. "/jsmn",
-                --PROJ_DIR .. "/3rdparty/imgui",
-                bxpath .. "/include",
-                bxpath .. "/include/compat/msvc",
-                thirdpartypath }
+            --PROJ_DIR .. "/3rdparty/SDL2-2.0.16/include",
+            --PROJ_DIR .. "/3rdparty/glew-2.1.0/include",
+            thirdpartypath,
+            thirdpartypath .. "/zlib-1.2.11",
+            thirdpartypath .. "/jsmn",
+            bgfxpath .. "/include",
+            bgfxpath .. "/3rdparty",
+            bgfxpath .. "/3rdparty/dear-imgui",
+            bgfxpath .. "/examples/common",
+            bxpath .. "/include",
+            bxpath .. "/include/compat/msvc",
+            bimgpath .. "/include"
+            }
 
     defines { "_CRT_SECURE_NO_WARNINGS", "JSMN_STATIC", "BX_CONFIG_DEBUG=1", "ENTRY_CONFIG_IMPLEMENT_MAIN=1" } --"_USRDLL",
     flags { "NoNativeWChar", "NoEditAndContinue", "StaticRuntime", "NoExceptions" }
