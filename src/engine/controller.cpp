@@ -100,7 +100,6 @@ void Controller::UpdateRenderCamera( float delta_seconds )
 	if( !m_active_cam && m_cameras.size() )
 	{
 		m_active_cam = m_cameras[0];
-		//m_pActiveCamCtrl->InitFromView( m_pActiveCam->GetView() );
 	}
 
 	CameraView* current_view = m_active_cam ? &m_active_cam->GetView() : &m_render_view;
@@ -109,10 +108,10 @@ void Controller::UpdateRenderCamera( float delta_seconds )
 
 	m_render_view = *current_view;
 
-	// Compute proj matrix (REBIND)
-/*	SDL_DisplayMode display_mode = g_pEngine->GetDisplayMode();
-	m_render_view.m_parameters[eCP_ASPECT] = (float)display_mode.w / (float)display_mode.h;
-	m_render_proj_matrix = mat4::perspective(m_render_view.m_parameters[eCP_FOV] * (F_PI / 180.0f), (float)display_mode.w / (float)display_mode.h, m_render_view.m_parameters[eCP_NEAR], m_render_view.m_parameters[eCP_FAR])*/;
+	// Compute proj matrix
+	Engine::DisplayMode display_mode = Engine::Get()->GetDisplayMode();
+	m_render_view.m_parameters[eCP_ASPECT] = (float)display_mode.width / (float)display_mode.height;
+	m_render_proj_matrix = mat4::perspective(m_render_view.m_parameters[eCP_FOV] * (F_PI / 180.0f), (float)display_mode.width / (float)display_mode.height, m_render_view.m_parameters[eCP_NEAR], m_render_view.m_parameters[eCP_FAR]);
 }
 
 void Controller::OnInputX( uint32 modifier_flags, float delta )
