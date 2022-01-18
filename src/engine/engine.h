@@ -52,16 +52,19 @@ public:
 
 	//SDL_DisplayMode const&	GetDisplayMode()							{ return m_display_mode;		}
 	//SDL_Window*				GetDisplayWindow()							{ return m_main_window;		}
-	CommandLine&			GetCommandLine()							{ return m_cmd_line;			}
 
 	struct DisplayMode
 	{
 		int width = 0;
 		int height = 0;
 	};
-	DisplayMode			GetDisplayMode() { return m_display_mode; }
+	DisplayMode			GetDisplayMode()	{ return m_display_mode; }
+	static Engine*		Get()				{ return ms_engine; }
+	CommandLine& GetCommandLine()			{ return m_cmd_line; }
+
 
 protected:
+	static Engine*			ms_engine;
 	//SDL_Window*				m_main_window; 
 	DisplayMode				m_display_mode;
 	//SDL_GLContext			m_gl_context; 
@@ -84,8 +87,6 @@ protected:
 	virtual void	ResizeWindow(int w, int h);
     virtual void    PreTickManagers( struct TickContext& tick_ctxt );
 };
-
-extern BIGFX_API Engine* g_pEngine;
 
 } /* namespace bigfx */
 

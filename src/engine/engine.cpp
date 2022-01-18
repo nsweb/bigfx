@@ -22,7 +22,7 @@
 namespace bigfx
 {
 
-Engine* g_pEngine = nullptr;
+Engine* Engine::ms_engine = nullptr;
 
 static CameraView g_SavedFrustumView;
 
@@ -32,12 +32,12 @@ Engine::Engine() :
 	m_render_mode(RenderContext::eRM_Lit),
 	m_show_culling(false)
 {
-	
+    ms_engine = this;
 }
 
 Engine::~Engine()
 {
-
+    ms_engine = nullptr;
 }
 
 bool Engine::Init(EngineInitParams const& init_params)
@@ -126,6 +126,9 @@ bool Engine::Init(EngineInitParams const& init_params)
  //   // Work around a bug on Mac OS X where window is not displayed correctly
  //   glViewport(0, 0, m_display_mode.w, m_display_mode.h);
  //   SDL_SetWindowSize(m_main_window, m_display_mode.w, m_display_mode.h);
+
+    m_display_mode.width = res_x;
+    m_display_mode.height = res_y;
 
 	// Ready to init our managers
 	InitManagers();
