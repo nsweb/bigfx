@@ -111,7 +111,7 @@ void Controller::UpdateRenderCamera( float delta_seconds )
 	// Compute proj matrix
 	Engine::DisplayMode display_mode = Engine::Get()->GetDisplayMode();
 	m_render_view.m_parameters[eCP_ASPECT] = (float)display_mode.width / (float)display_mode.height;
-	m_render_proj_matrix = mat4::perspective(m_render_view.m_parameters[eCP_FOV] * (F_PI / 180.0f), (float)display_mode.width / (float)display_mode.height, m_render_view.m_parameters[eCP_NEAR], m_render_view.m_parameters[eCP_FAR]);
+	m_render_proj_matrix = mat4::perspective(m_render_view.m_parameters[eCP_FOV], (float)display_mode.width / (float)display_mode.height, m_render_view.m_parameters[eCP_NEAR], m_render_view.m_parameters[eCP_FAR]);
 }
 
 void Controller::OnInputX( uint32 modifier_flags, float delta )

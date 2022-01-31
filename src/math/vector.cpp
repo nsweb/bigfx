@@ -767,90 +767,95 @@ template<> mat4 mat4::lookat(vec3 eye, vec3 center, vec3 up)
     return orient * mat4::translate(-eye);
 }
 
-template<> mat4 mat4::ortho(float left, float right, float bottom,
-                            float top, float zNear, float zFar)
-{
-    float invrl = (right != left) ? 1.0f / (right - left) : 0.0f;
-    float invtb = (top != bottom) ? 1.0f / (top - bottom) : 0.0f;
-    float invfn = (zFar != zNear) ? 1.0f / (zFar - zNear) : 0.0f;
-
-    mat4 ret(0.0f);
-    ret[0][0] = 2.0f * invrl;
-    ret[1][1] = 2.0f * invtb;
-    ret[2][2] = -2.0f * invfn;
-    ret[3][0] = - (right + left) * invrl;
-    ret[3][1] = - (top + bottom) * invtb;
-    ret[3][2] = - (zFar + zNear) * invfn;
-    ret[3][3] = 1.0f;
-    return ret;
-}
-
-template<> mat4 mat4::ortho(float width, float height,
-                            float zNear, float zFar)
-{
-    return mat4::ortho(-0.5f * width, 0.5f * width,
-                       -0.5f * height, 0.5f * height, zNear, zFar);
-}
-
-template<> mat4 mat4::frustum(float left, float right, float bottom,
-                              float top, float zNear, float zFar)
-{
-    float invrl = (right != left) ? 1.0f / (right - left) : 0.0f;
-    float invtb = (top != bottom) ? 1.0f / (top - bottom) : 0.0f;
-    float invfn = (zFar != zNear) ? 1.0f / (zFar - zNear) : 0.0f;
-
-    mat4 ret(0.0f);
-    ret[0][0] = 2.0f * zNear * invrl;
-    ret[1][1] = 2.0f * zNear * invtb;
-    ret[2][0] = (right + left) * invrl;
-    ret[2][1] = (top + bottom) * invtb;
-    ret[2][2] = - (zFar + zNear) * invfn;
-    ret[2][3] = -1.0f;
-    ret[3][2] = -2.0f * zFar * zNear * invfn;
-    return ret;
-}
+//template<> mat4 mat4::ortho(float left, float right, float bottom,
+//                            float top, float zNear, float zFar)
+//{
+//    float invrl = (right != left) ? 1.0f / (right - left) : 0.0f;
+//    float invtb = (top != bottom) ? 1.0f / (top - bottom) : 0.0f;
+//    float invfn = (zFar != zNear) ? 1.0f / (zFar - zNear) : 0.0f;
+//
+//    mat4 ret(0.0f);
+//    ret[0][0] = 2.0f * invrl;
+//    ret[1][1] = 2.0f * invtb;
+//    ret[2][2] = -2.0f * invfn;
+//    ret[3][0] = - (right + left) * invrl;
+//    ret[3][1] = - (top + bottom) * invtb;
+//    ret[3][2] = - (zFar + zNear) * invfn;
+//    ret[3][3] = 1.0f;
+//    return ret;
+//}
+//
+//template<> mat4 mat4::ortho(float width, float height,
+//                            float zNear, float zFar)
+//{
+//    return mat4::ortho(-0.5f * width, 0.5f * width,
+//                       -0.5f * height, 0.5f * height, zNear, zFar);
+//}
+//
+//template<> mat4 mat4::frustum(float left, float right, float bottom,
+//                              float top, float zNear, float zFar)
+//{
+//    float invrl = (right != left) ? 1.0f / (right - left) : 0.0f;
+//    float invtb = (top != bottom) ? 1.0f / (top - bottom) : 0.0f;
+//    float invfn = (zFar != zNear) ? 1.0f / (zFar - zNear) : 0.0f;
+//
+//    mat4 ret(0.0f);
+//    ret[0][0] = 2.0f * zNear * invrl;
+//    ret[1][1] = 2.0f * zNear * invtb;
+//    ret[2][0] = (right + left) * invrl;
+//    ret[2][1] = (top + bottom) * invtb;
+//    ret[2][2] = - (zFar + zNear) * invfn;
+//    ret[2][3] = -1.0f;
+//    ret[3][2] = -2.0f * zFar * zNear * invfn;
+//    return ret;
+//}
 
 //Returns a standard perspective matrix
-template<> mat4 mat4::perspective_fov(float fov_y, float width,
+template<> mat4 mat4::perspective(float fov_y_deg, float width,
                                   float height, float zNear, float zFar)
 {
-    fov_y *= (F_PI / 180.0f);
+    //fov_y *= (F_PI / 180.0f);
 
-    float t2 = tan(fov_y * 0.5f);
-    float t1 = t2 * width / height;
+    //float t2 = tan(fov_y * 0.5f);
+    //float t1 = t2 * width / height;
 
-    return frustum(-zNear * t1, zNear * t1, -zNear * t2, zNear * t2, zNear, zFar);
+    //return frustum(-zNear * t1, zNear * t1, -zNear * t2, zNear * t2, zNear, zFar);
+
+    return perspective(fov_y_deg, width / height, zNear, zFar);
 }
 
-template<> mat4 mat4::perspective( float fov_y, float aspect, float zNear, float zFar )
+template<> mat4 mat4::perspective( float fov_y_deg, float aspect, float zNear, float zFar )
 {
 	BB_ASSERT(aspect != 0.0f);
 	BB_ASSERT(zFar != zNear);
 
-	float tanHalfFovy = tan(fov_y * 0.5f);
-	mat4 Result(0.0f);
-	Result[0][0] = 1.0f / (aspect * tanHalfFovy);
-	Result[1][1] = 1.0f / (tanHalfFovy);
-	Result[2][2] = - (zFar + zNear) / (zFar - zNear);
-	Result[2][3] = - 1.0f;
-	Result[3][2] = - (2.0f * zFar * zNear) / (zFar - zNear);
-	return Result;
+    mat4 result(0.0f);
+    bx::mtxProj(&result[0][0], fov_y_deg, aspect, zNear, zFar, bgfx::getCaps()->homogeneousDepth, bx::Handness::Right);
+
+	//float tanHalfFovy = tan(fov_y * 0.5f);
+	//mat4 Result(0.0f);
+	//Result[0][0] = 1.0f / (aspect * tanHalfFovy);
+	//Result[1][1] = 1.0f / (tanHalfFovy);
+	//Result[2][2] = - (zFar + zNear) / (zFar - zNear);
+	//Result[2][3] = - 1.0f;
+	//Result[3][2] = - (2.0f * zFar * zNear) / (zFar - zNear);
+	return result;
 }
 
 //Returns a perspective matrix with the camera location shifted to be on the near plane
-template<> mat4 mat4::shifted_perspective(float fov_y, float screen_size,
-                                          float screen_ratio_yx, float zNear, float zFar)
-{
-    float new_fov_y = fov_y * (F_PI / 180.0f);
-    float tan_y = tan(new_fov_y * .5f);
-    BB_ASSERT(tan_y > 0.000001f);
-    float dist_scr = (screen_size * screen_ratio_yx * .5f) / tan_y;
-
-    return mat4::perspective_fov(fov_y, screen_size, screen_size * screen_ratio_yx,
-                             max(.001f, dist_scr + zNear),
-                             max(.001f, dist_scr + zFar)) *
-           mat4::translate(.0f, .0f, -dist_scr);
-}
+//template<> mat4 mat4::shifted_perspective(float fov_y, float screen_size,
+//                                          float screen_ratio_yx, float zNear, float zFar)
+//{
+//    float new_fov_y = fov_y * (F_PI / 180.0f);
+//    float tan_y = tan(new_fov_y * .5f);
+//    BB_ASSERT(tan_y > 0.000001f);
+//    float dist_scr = (screen_size * screen_ratio_yx * .5f) / tan_y;
+//
+//    return mat4::perspective_fov(fov_y, screen_size, screen_size * screen_ratio_yx,
+//                             max(.001f, dist_scr + zNear),
+//                             max(.001f, dist_scr + zFar)) *
+//           mat4::translate(.0f, .0f, -dist_scr);
+//}
 
 } /* namespace bigfx */
 

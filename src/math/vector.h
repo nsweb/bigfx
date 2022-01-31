@@ -1886,12 +1886,12 @@ template <typename T> struct /*BIGFX_API*/ Mat4
     static Mat4<T> lookat(Vec3<T> eye, Vec3<T> center, Vec3<T> up);
 
     /* Helpers for projection matrices */
-    static Mat4<T> ortho(T left, T right, T bottom, T top, T zNear, T zFar);
-    static Mat4<T> ortho(T width, T height, T zNear, T zFar);
-    static Mat4<T> frustum(T left, T right, T bottom, T top, T zNear, T zFar);
-    static Mat4<T> perspective_fov(T fov_y, T width, T height, T zNear, T zFar);
-	static Mat4<T> perspective(T fov_y, T aspect, T zNear, T zFar );
-    static Mat4<T> shifted_perspective(T fov_y, T screen_size, T screen_ratio_yx, T zNear, T zFar);
+    //static Mat4<T> ortho(T left, T right, T bottom, T top, T zNear, T zFar);
+    //static Mat4<T> ortho(T width, T height, T zNear, T zFar);
+    //static Mat4<T> frustum(T left, T right, T bottom, T top, T zNear, T zFar);
+    static Mat4<T> perspective(T fov_y_deg, T width, T height, T zNear, T zFar);
+	static Mat4<T> perspective(T fov_y_deg, T aspect, T zNear, T zFar );
+    //static Mat4<T> shifted_perspective(T fov_y, T screen_size, T screen_ratio_yx, T zNear, T zFar);
 
     void printf() const;
 
