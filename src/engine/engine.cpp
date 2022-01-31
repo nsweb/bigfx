@@ -19,6 +19,10 @@
 // HACK
 #include "../system/file.h"
 
+#include "imgui/imgui.h"
+#include "entry/input.h"
+#include "entry/cmd.h"
+
 namespace bigfx
 {
 
@@ -42,93 +46,50 @@ Engine::~Engine()
 
 bool Engine::Init(EngineInitParams const& init_params)
 {
+    Args args(init_params.argc, init_params.argv);
+
 	m_init_params = init_params;
 
- //   if (SDL_Init(SDL_INIT_VIDEO) < 0) /* Initialize SDL's Video subsystem */
-	//{
- //       //sdldie("Unable to initialize SDL"); /* Or die on error */
-	//	return false;
-	//}
+    uint32 res_x = init_params.default_res_x;
+    uint32 res_y = init_params.default_res_y;
+    String str_value;
+    if (m_cmd_line.GetTokenValue("res_x", str_value))
+        res_x = std::atoi(str_value.c_str());
+    if (m_cmd_line.GetTokenValue("res_y", str_value))
+        res_y = std::atoi(str_value.c_str());
 
- //   /* Request opengl 3.2 context.
- //    * SDL doesn't have the ability to choose which profile at this time of writing,
- //    * but it should default to the core profile */
- //   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
- //   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
- //   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);//SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);//SDL_GL_CONTEXT_PROFILE_CORE);
+    m_display_mode.width = res_x;
+    m_display_mode.height = res_y;
 
- //   /* Turn on double buffering with a 24bit Z buffer.
- //    * You may need to change this to 16 or 32 for your system */
- //   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
- //   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
- //   
- //   SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
- //   SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+    m_debug = BGFX_DEBUG_NONE;
+    m_reset = BGFX_RESET_VSYNC;
 
-    /* Create our window centered at 512x512 resolution */
-	int res_x = init_params.default_res_x;
-	int res_y = init_params.default_res_y;
-	String str_value;
-	if( m_cmd_line.GetTokenValue( "res_x", str_value ) )
-		res_x = std::atoi( str_value.c_str() );
-	if( m_cmd_line.GetTokenValue( "res_y", str_value ) )
-		res_y = std::atoi( str_value.c_str() );
+    bgfx::Init init;
+    init.type = args.m_type;
+    init.vendorId = args.m_pciId;
+    init.resolution.width = res_x;
+    init.resolution.height = res_y;
+    init.resolution.reset = m_reset;
+    bgfx::init(init);
 
-	//uint32 window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
-	//if (init_params.resizable_window)
-	//	window_flags |= SDL_WINDOW_RESIZABLE;
- //   m_main_window = SDL_CreateWindow("GL Window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-	//	res_x, res_y, window_flags);
- //   if( !m_main_window ) /* Die if creation failed */
-	//{
- //     //  sdldie("Unable to create window");
-	//	return false;
-	//}
+    entry::setCurrentDir("../data/");
 
-    /* Create our opengl context and attach it to our window */
-    //m_gl_context = SDL_GL_CreateContext( m_main_window );
-    //checkSDLError(__LINE__);
+    // Enable debug text.
+    bgfx::setDebug(m_debug);
 
-	// Init GLEW
-	//glewExperimental = GL_TRUE; 
-	//glewInit();
+    // Set view 0 clear state.
+    bgfx::setViewClear(0
+        , BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH
+        , 0x303030ff
+        , 1.0f
+        , 0
+    );
 
-	// Show version info
-	/*int num_drivers = SDL_GetNumVideoDrivers();
-	for (int i = 0; i < num_drivers; i++)
-	{
-		const char* driver_id = SDL_GetVideoDriver(i);
-		BB_LOG(EngineInit, Log, "Driver<%d>: %s", i, driver_id);
-	}*/
-	
-	//const char* driver_id = SDL_GetCurrentVideoDriver();
-	//const char* renderer_id = (const char*)glGetString (GL_RENDERER);	// get renderer string
-	//const char* version_id = (const char*)glGetString (GL_VERSION);		// version as a string
-	//BB_LOG(EngineInit, Log, "Driver: %s", driver_id);
-	//BB_LOG(EngineInit, Log, "Renderer: %s", renderer_id);
-	//BB_LOG(EngineInit, Log, "OpenGL version supported %s", version_id);
-
-    /* This makes our buffer swap syncronized with the monitor's vertical refresh */
- //   SDL_GL_SetSwapInterval(1);
-
- //   /* Clear our buffer with a blue background */
- //   glClearColor( 0.1f, 0.1f, 0.3f, 1.0f );
- //   glClear ( GL_COLOR_BUFFER_BIT );
- //   /* Swap our back buffer to the front */
- //   SDL_GL_SwapWindow( m_main_window );
-
-	//SDL_GetWindowDisplayMode( m_main_window, &m_display_mode );
+    imguiCreate();
 
 	//// Allow FPS style mouse movement if needed (mouse capture)
 	//SDL_SetRelativeMouseMode(init_params.mouse_capture ? SDL_TRUE : SDL_FALSE);
 	//SDL_SetWindowGrab(m_main_window, init_params.mouse_capture ? SDL_TRUE : SDL_FALSE);
- //   
- //   // Work around a bug on Mac OS X where window is not displayed correctly
- //   glViewport(0, 0, m_display_mode.w, m_display_mode.h);
- //   SDL_SetWindowSize(m_main_window, m_display_mode.w, m_display_mode.h);
-
-    m_display_mode.width = res_x;
-    m_display_mode.height = res_y;
 
 	// Ready to init our managers
 	InitManagers();
@@ -140,6 +101,9 @@ bool Engine::Init(EngineInitParams const& init_params)
 	// Create UI manager
 	UIManager* ui_manager = new UIManager();
 	ui_manager->Create();
+
+    // Register input shortcuts
+    RegisterInputBindings();
 
 	// Declare available components and entities
 	DeclareComponentsAndEntities();
@@ -160,10 +124,10 @@ void Engine::Shutdown()
 
 	DestroyManagers();
 
-	/* Delete our opengl context, destroy our window, and shutdown SDL */
-	//SDL_GL_DeleteContext( m_gl_context );
-	//SDL_DestroyWindow( m_main_window );
-	//SDL_Quit();
+    imguiDestroy();
+
+    // Shutdown bgfx.
+    bgfx::shutdown();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -209,79 +173,120 @@ void Engine::CreateGameCameras()
 }
 
 //////////////////////////////////////////////////////////////////////////
-void Engine::MainLoop()
+bool Engine::MainLoop()
 {
-	//uint64 old_time, current_time = SDL_GetPerformanceCounter();
+    if (!entry::processEvents(m_display_mode.width, m_display_mode.height, m_debug, m_reset, &m_mouseState))
+    {
+        // Set view 0 default viewport.
+        bgfx::setViewRect(0, 0, 0, uint16_t(m_display_mode.width), uint16_t(m_display_mode.height));
 
-	while( 1 )
-	{
-		//old_time = current_time;
-		//current_time = SDL_GetPerformanceCounter();
-		//float delta_seconds = (current_time - old_time) / (float)SDL_GetPerformanceFrequency(); // / 1000.0f;
+        // Set view 1 default viewport.
+        //bgfx::setViewRect(1, 0, 0, uint16_t(m_width), uint16_t(m_height) );
+
+        // This dummy draw call is here to make sure that view 0 is cleared
+        // if no other draw calls are submitted to viewZ 0.
+        bgfx::touch(0);
 
         int64 now = bx::getHPCounter();
         static int64 last = now;
         const int64 frameTime = now - last;
         last = now;
         const float delta_seconds = float(frameTime / double(bx::getHPFrequency()));
-        
-        int loop_status = 1; // HandleEvents(delta_seconds);
+        TickContext tick_ctxt(delta_seconds, m_frame_count);
 
-		//glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-		//// tell GL to only draw onto a pixel if the shape is closer to the viewer
-		//glEnable( GL_DEPTH_TEST ); // enable depth-testing
-		//glDepthFunc( GL_LESS ); // depth-testing interprets a smaller value as "closer"
-  //      //glDepthRange(0.f, 1.f);
-		//glEnable( GL_CULL_FACE );
-		//glCullFace( GL_BACK );
-
-		//if( m_render_mode == RenderContext::eRM_Wireframe )
-		//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		//else
-		//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-		TickContext tick_ctxt( delta_seconds, m_frame_count );
-        
         PreTickManagers(tick_ctxt);
-		for( int32 i = 0; i < m_managers.size(); ++i )
-		{
-			m_managers[i]->Tick( tick_ctxt );
-		}
+        for (int32 i = 0; i < m_managers.size(); ++i)
+        {
+            m_managers[i]->Tick(tick_ctxt);
+        }
 
-		// Prepare rendering
-		RenderContext render_ctxt;
+        // Prepare rendering
+        RenderContext render_ctxt;
         CameraView view = Controller::GetStaticInstance()->GetRenderView();
-		render_ctxt.m_view = view;
-		render_ctxt.m_pfrustum_view = (m_show_culling ? &g_SavedFrustumView : nullptr);
+        render_ctxt.m_view = view;
+        render_ctxt.m_pfrustum_view = (m_show_culling ? &g_SavedFrustumView : nullptr);
         mat4 cam_to_world_mat(view.m_transform.GetRotation(), view.m_transform.GetTranslation(), (float)view.m_transform.GetScale());
         render_ctxt.m_view_mat = bigfx::inverse(cam_to_world_mat);
-		render_ctxt.m_proj_mat = Controller::GetStaticInstance()->GetRenderProjMatrix();
-		render_ctxt.m_delta_seconds = delta_seconds;
-		render_ctxt.m_frame_idx = m_frame_count++;
-		render_ctxt.m_render_mode = m_render_mode;
-		for( int32 i = 0; i < m_managers.size(); ++i )
-		{
-			m_managers[i]->_Render( render_ctxt );
-		}
+        render_ctxt.m_proj_mat = Controller::GetStaticInstance()->GetRenderProjMatrix();
+        render_ctxt.m_delta_seconds = delta_seconds;
+        render_ctxt.m_frame_idx = m_frame_count++;
+        render_ctxt.m_render_mode = m_render_mode;
+        for (int32 i = 0; i < m_managers.size(); ++i)
+        {
+            m_managers[i]->_Render(render_ctxt);
+        }
 
-		DrawUtils::GetStaticInstance()->_Render(render_ctxt);
+        DrawUtils::GetStaticInstance()->_Render(render_ctxt);
 
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		UIManager::GetStaticInstance()->_Render(render_ctxt);
+        // Render UI
+        imguiBeginFrame(m_mouseState.m_mx
+            , m_mouseState.m_my
+            , (m_mouseState.m_buttons[entry::MouseButton::Left] ? IMGUI_MBUT_LEFT : 0)
+            | (m_mouseState.m_buttons[entry::MouseButton::Right] ? IMGUI_MBUT_RIGHT : 0)
+            | (m_mouseState.m_buttons[entry::MouseButton::Middle] ? IMGUI_MBUT_MIDDLE : 0)
+            , m_mouseState.m_mz
+            , uint16_t(m_display_mode.width)
+            , uint16_t(m_display_mode.height)
+        );
 
-		//SDL_GL_SwapWindow( m_main_window );
+        showExampleDialog(m_init_params.app);
 
-		//// Reset profiler data for next frame
-		//PROFILE_THREAD_FRAMERESET()
+        UIManager::GetStaticInstance()->_Render(render_ctxt);
 
-		if( loop_status == 1 ) // if received instruction to quit
-			break;
-	}
+        imguiEndFrame();
+
+
+        // Advance to next frame. Rendering thread will be kicked to
+        // process submitted rendering primitives.
+        bgfx::frame();
+
+        return true;
+    }
+
+    return false;
 }
     
 void Engine::PreTickManagers( struct TickContext& tick_ctxt )
 {
         
+}
+
+static int ImputCmdEngine(CmdContext* /*_context*/, void* /*_userData*/, int _argc, char const* const* _argv)
+{
+	if (_argc > 1)
+	{
+        if (0 == bx::strCmp(_argv[1], "debugmenu"))
+        {
+            UIManager::GetStaticInstance()->ToggleDebugMenu();
+        }
+        else if (0 == bx::strCmp(_argv[1], "editor"))
+        {
+            UIManager::GetStaticInstance()->ToggleEditor();
+        }
+        else if (0 == bx::strCmp(_argv[1], "culling"))
+        {
+            Engine::Get()->m_show_culling = !Engine::Get()->m_show_culling;
+            if (Engine::Get()->m_show_culling)
+                g_SavedFrustumView = Controller::GetStaticInstance()->GetRenderView();
+        }
+	}
+
+	return bx::kExitFailure;
+}
+
+void Engine::RegisterInputBindings()
+{
+    static const InputBinding s_input_bindings[] =
+    {
+        { entry::Key::F5,           entry::Modifier::None,      1, NULL, "engine debugmenu"                  },
+        { entry::Key::KeyE,         entry::Modifier::LeftCtrl,  1, NULL, "engine editor"                     },
+        { entry::Key::KeyC,         entry::Modifier::LeftCtrl,  1, NULL, "engine culling"                    },
+
+        INPUT_BINDING_END
+    };
+
+	cmdAdd("engine", ImputCmdEngine);
+	inputAddBindings("bindings_engine", s_input_bindings);
 }
 
 #if 0
@@ -469,22 +474,6 @@ void Engine::ResizeWindow(int w, int h)
 {
 	m_display_mode.width = w;
 	m_display_mode.height = h;
-	//SDL_SetWindowDisplayMode(m_main_window, &m_display_mode);
- //   
- //   glViewport(0,0,w,h);
-    
-    //ZZZ
-    //ImGuiIO& io = ImGui::GetIO();
-    //io.DisplaySize = ImVec2((float)w, (float)h);  // Display size, in pixels. For clamping windows positions.
-    
-    /*
-    SDL_CreateRenderer();
-    SDL_Rect topLeftViewport;
-    topLeftViewport.x = 0;
-    topLeftViewport.y = 0;
-    topLeftViewport.w = SCREEN_WIDTH / 2;
-    topLeftViewport.h = SCREEN_HEIGHT / 2;
-    SDL_RenderSetViewport( gRenderer, &topLeftViewport );*/
 }
 
 //////////////////////////////////////////////////////////////////////////

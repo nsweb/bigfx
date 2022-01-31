@@ -3,6 +3,8 @@
 #ifndef BB_ENGINE_H
 #define BB_ENGINE_H
 
+#include "entry/entry.h"
+
 namespace bigfx
 {
 
@@ -25,15 +27,21 @@ struct BIGFX_API EngineInitParams
 	bool create_window;
 	bool resizable_window;
 	bool mouse_capture;
-	int32 default_res_x;
-	int32 default_res_y;
+	uint32 default_res_x;
+	uint32 default_res_y;
+	int32 argc;
+	const char* const* argv;
+	entry::AppI* app;
 
 	EngineInitParams() :
 		create_window(true),
 		resizable_window(false),
 		mouse_capture(true),
 		default_res_x(800),
-		default_res_y(600)
+		default_res_y(600),
+		argc(0),
+		argv(nullptr),
+		app(nullptr)
 	{}
 };
 
@@ -46,30 +54,30 @@ public:
 
 	virtual bool	Init(EngineInitParams const& init_params);
 	virtual void	Shutdown();
-	virtual void	MainLoop();
+	virtual bool	MainLoop();
 	virtual bool	RunCommand( String const& cmd_type, Array<String> const& switches, Array<String> const& tokens );
     //virtual int     HandleEvents(float delta_seconds);
-
-	//SDL_DisplayMode const&	GetDisplayMode()							{ return m_display_mode;		}
-	//SDL_Window*				GetDisplayWindow()							{ return m_main_window;		}
+	virtual void	RegisterInputBindings();
 
 	struct DisplayMode
 	{
-		int width = 0;
-		int height = 0;
+		uint32	width = 0;
+		uint32	height = 0;
 	};
 	DisplayMode			GetDisplayMode()	{ return m_display_mode; }
 	static Engine*		Get()				{ return ms_engine; }
-	CommandLine& GetCommandLine()			{ return m_cmd_line; }
+	CommandLine&		GetCommandLine()	{ return m_cmd_line; }
 
 
 protected:
 	static Engine*			ms_engine;
-	//SDL_Window*				m_main_window; 
 	DisplayMode				m_display_mode;
-	//SDL_GLContext			m_gl_context; 
 	CommandLine				m_cmd_line;
 	EngineInitParams		m_init_params;
+
+	entry::MouseState		m_mouseState;
+	uint32_t				m_debug;
+	uint32_t				m_reset;
 
 	Array<BaseManager*>		m_managers;
 
@@ -86,6 +94,7 @@ protected:
 	//void			InitImGui();
 	virtual void	ResizeWindow(int w, int h);
     virtual void    PreTickManagers( struct TickContext& tick_ctxt );
+
 };
 
 } /* namespace bigfx */
