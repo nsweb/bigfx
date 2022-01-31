@@ -39,6 +39,7 @@
 #endif
 
 #include "bx/bx.h"
+#include "bgfx_utils.h"
 #include "core/core.h"
 #include "core/memory.h"
 #include "core/log.h"
@@ -51,6 +52,5 @@
 #include "math/constants.h"
 #include "math/vector.h"
 #include "math/transform.h"
-
 
 #endif // BB_BIGBALL_H
