@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Build generated files
+build/
+
+# Keep lua files
+!*.lua
