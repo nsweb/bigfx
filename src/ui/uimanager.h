@@ -1,6 +1,3 @@
-
-
-
 #ifndef BB_UIMANAGER_H
 #define BB_UIMANAGER_H
 
@@ -47,7 +44,7 @@ public:
 	void                SetDrawCustomMenuFn(DrawCustomMenuBarCB fn) { m_draw_custom_menu_fn = fn; }
 
 protected:
-	//void				InitImGui(); //ZZZ
+
 	void				DrawDebugMenu();
 	void				DrawProfiler();
 
@@ -57,16 +54,6 @@ public:
     DrawEditorCB            m_draw_editor_fn;
     ToggleEditorCB          m_toggle_editor_fn;
 	DrawCustomMenuBarCB		m_draw_custom_menu_fn;
-#if 0 // REBIND
-	GLuint					m_debug_font_tex_id;
-	Shader*					m_ui_shader;
-	/** Dynamic VB used to render ui elements */
-	GLuint					m_UI_VAO;
-	//GLuint					m_UI_VB_TEMP;
-	//UnsynchronizedVBO		m_UI_VBO;
-	GLuint					m_UI_VBO;
-	GLuint					m_UI_EBO;
-#endif // 0
 
 	bool					m_show_debug_menu;
 	bool					m_show_profiler;
