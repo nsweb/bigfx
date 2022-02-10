@@ -13,13 +13,6 @@ function setBigfxLibs( _configuration, _platform, _bigfxpath )
 		platformname = "Win64"
 	end
 
-	-- local glewpath
-	-- if _platform == "native" then
-	-- 	glewpath = string.format( "%s/3rdparty/glew-2.1.0/lib", _basepath )
-	-- else
-	-- 	glewpath = string.format( "%s/3rdparty/glew-2.1.0/lib/release/%s", _basepath, _platform )
-	-- end
-
 	-- local sdl2path = string.format( "%s/3rdparty/SDL2-2.0.16/lib/%s", _basepath, _platform)
 	-- local sdl2options = string.format( "-F %s/3rdparty/SDL2-2.0.16/lib/%s", _basepath, _platform)
 
