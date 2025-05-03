@@ -34,6 +34,20 @@ namespace Draw
         static bgfx::VertexLayout ms_layout;
     };
 
+    struct QuadVertex
+    {
+        vec2	m_pos;
+
+        static void init()
+        {
+            ms_layout
+                .begin()
+                .add(bgfx::Attrib::Position, 2, bgfx::AttribType::Float)
+                .end();
+        };
+        static bgfx::VertexLayout ms_layout;
+    };
+
     struct CubeVertex
     {
         vec3	m_pos;

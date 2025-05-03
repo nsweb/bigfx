@@ -56,7 +56,7 @@ public:
 	virtual void	Shutdown();
 	virtual bool	MainLoop();
 	virtual bool	RunCommand( String const& cmd_type, Array<String> const& switches, Array<String> const& tokens );
-    //virtual int     HandleEvents(float delta_seconds);
+    virtual int     HandleInputs(float delta_seconds);
 	virtual void	RegisterInputBindings();
 
 	struct DisplayMode

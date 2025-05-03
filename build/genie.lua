@@ -28,7 +28,7 @@ function createBigfxProject(_bigfxpath)
     kind "StaticLib"
     language "C++"
 
-    files { _bigfxpath .. "/src/**.h", _bigfxpath .. "/src/**.cpp", _bigfxpath .. "/data/shader/**.*" }
+    files { _bigfxpath .. "/src/**.*", _bigfxpath .. "/data/shader/**.*" }
 
     local thirdpartypath = _bigfxpath .. "/3rdparty"
     local bimgpath = thirdpartypath .. "/bimg"

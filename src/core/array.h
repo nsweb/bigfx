@@ -49,6 +49,18 @@ public:
 		that.m_count = 0;
 	}
 
+    Array(std::initializer_list<Element> that) : m_data(0), m_count(0), m_reserved(0)
+    {
+        /* reserve the exact number of values instead of what the other
+         * array had reserved. Just a method for not wasting too much. */
+        const int count = (int)that.size();
+        reserve(count);
+        int i = 0;
+        for(const Element& item : that)
+            new(&m_data[i++]) Element(item);
+        m_count = count;
+    }
+
     Array& operator=(Array const& that)
     {
         if ((uintptr_t)this != (uintptr_t)&that)
@@ -326,22 +338,22 @@ public:
 	inline int size_reserved() const { return m_reserved; }
     inline int Bytes() const { return m_count * sizeof(Element); }
 
-	int find( const Element& Item ) const
+	int find( const Element& item ) const
 	{
 		for( int i = 0; i < m_count; ++i )
 		{
-        	if( m_data[i] == Item )
+        	if( m_data[i] == item )
 				return i;
 		}
 		return -1;
 	}
 
 	template <typename KeyType>
-	int FindByKey( const KeyType& Key ) const
+	int FindByKey( const KeyType& key ) const
 	{
 		for( int i = 0; i < m_count; ++i )
 		{
-        	if( m_data[i] == Key )
+        	if( m_data[i] == key )
 				return i;
 		}
 		return -1;

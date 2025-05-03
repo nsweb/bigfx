@@ -8,6 +8,7 @@ namespace bigfx
 STATIC_MANAGER_CPP( DrawUtils )
 
 bgfx::VertexLayout Draw::Vertex::ms_layout;
+bgfx::VertexLayout Draw::QuadVertex::ms_layout;
 bgfx::VertexLayout Draw::CubeVertex::ms_layout;
 
 DrawUtils::DrawUtils()
@@ -23,6 +24,7 @@ DrawUtils::~DrawUtils()
 void DrawUtils::Create()
 {
     Draw::Vertex::init();
+    Draw::QuadVertex::init();
     Draw::CubeVertex::init();
 
     m_util_seg_program = loadProgram("utilseg_vs", "utilseg_fs");
@@ -70,7 +72,8 @@ void DrawUtils::_Render( struct RenderContext& render_ctxt )
     bgfx::setViewTransform(0, &render_ctxt.m_view_mat.v0, &render_ctxt.m_proj_mat.v0);
 
     // Render Segments
-    if (checkAvailTransientBuffers(m_seg_buffer.size(), Draw::Vertex::ms_layout, m_seg_index_buffer.size()))
+    if (m_seg_buffer.size() > 0 &&
+        checkAvailTransientBuffers(m_seg_buffer.size(), Draw::Vertex::ms_layout, m_seg_index_buffer.size()))
     {
         bgfx::TransientVertexBuffer tvb;
         bgfx::allocTransientVertexBuffer(&tvb, m_seg_buffer.size(), Draw::Vertex::ms_layout);
@@ -91,32 +94,34 @@ void DrawUtils::_Render( struct RenderContext& render_ctxt )
         bgfx::submit(0, m_util_seg_program);
     }
 
-
     const uint32 instance_stride = sizeof(Draw::InstanceParams);
     uint32 num_shapes = m_shape_params.size();
-    uint32 avail_shapes = bgfx::getAvailInstanceDataBuffer(num_shapes, instance_stride);
-    if (num_shapes <= avail_shapes)
+    if (num_shapes > 0)
     {
-        bgfx::InstanceDataBuffer idb;
-        bgfx::allocInstanceDataBuffer(&idb, num_shapes, instance_stride);
-
-        Draw::InstanceParams* data = (Draw::InstanceParams*)idb.data;
-
-        for (uint32 ii = 0; ii < num_shapes; ++ii)
+        uint32 avail_shapes = bgfx::getAvailInstanceDataBuffer(num_shapes, instance_stride);
+        if (num_shapes <= avail_shapes)
         {
-            data[ii] = m_shape_params[ii];
+            bgfx::InstanceDataBuffer idb;
+            bgfx::allocInstanceDataBuffer(&idb, num_shapes, instance_stride);
+
+            Draw::InstanceParams* data = (Draw::InstanceParams*)idb.data;
+
+            for (uint32 ii = 0; ii < num_shapes; ++ii)
+            {
+                data[ii] = m_shape_params[ii];
+            }
+
+            bgfx::setViewTransform(0, &render_ctxt.m_view_mat.v0, &render_ctxt.m_proj_mat.v0);
+
+            // Set vertex and index buffer.
+            SetCubeBuffers();
+
+            // Set instance data buffer.
+            bgfx::setInstanceDataBuffer(&idb);
+
+            bgfx::setState(BGFX_STATE_DEFAULT);
+            bgfx::submit(0, m_util_shape_program);
         }
-
-        bgfx::setViewTransform(0, &render_ctxt.m_view_mat.v0, &render_ctxt.m_proj_mat.v0);
-
-        // Set vertex and index buffer.
-        SetCubeBuffers();
-
-        // Set instance data buffer.
-        bgfx::setInstanceDataBuffer(&idb);
-
-        bgfx::setState(BGFX_STATE_DEFAULT);
-        bgfx::submit(0, m_util_shape_program);
     }
 
 	// Purge old elements

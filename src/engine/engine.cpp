@@ -91,9 +91,6 @@ bool Engine::Init(EngineInitParams const& init_params)
 	//SDL_SetRelativeMouseMode(init_params.mouse_capture ? SDL_TRUE : SDL_FALSE);
 	//SDL_SetWindowGrab(m_main_window, init_params.mouse_capture ? SDL_TRUE : SDL_FALSE);
 
-	// Ready to init our managers
-	InitManagers();
-
 	// Create drawutils manager
 	DrawUtils* draw_utils = new DrawUtils();
 	draw_utils->Create();
@@ -101,6 +98,9 @@ bool Engine::Init(EngineInitParams const& init_params)
 	// Create UI manager
 	UIManager* ui_manager = new UIManager();
 	ui_manager->Create();
+
+    // Ready to init our managers
+    InitManagers();
 
     // Register input shortcuts
     RegisterInputBindings();
@@ -116,13 +116,13 @@ bool Engine::Init(EngineInitParams const& init_params)
 
 void Engine::Shutdown()
 {
+    DestroyManagers();
+
 	UIManager::GetStaticInstance()->Destroy();
 	delete UIManager::GetStaticInstance();
 
 	DrawUtils::GetStaticInstance()->Destroy();
 	delete DrawUtils::GetStaticInstance();
-
-	DestroyManagers();
 
     imguiDestroy();
 
@@ -179,6 +179,7 @@ bool Engine::MainLoop()
     {
         // Set view 0 default viewport.
         bgfx::setViewRect(0, 0, 0, uint16_t(m_display_mode.width), uint16_t(m_display_mode.height));
+        bgfx::setViewMode(0, bgfx::ViewMode::Sequential);
 
         // Set view 1 default viewport.
         //bgfx::setViewRect(1, 0, 0, uint16_t(m_width), uint16_t(m_height) );
@@ -193,6 +194,8 @@ bool Engine::MainLoop()
         last = now;
         const float delta_seconds = float(frameTime / double(bx::getHPFrequency()));
         TickContext tick_ctxt(delta_seconds, m_frame_count);
+
+        HandleInputs(delta_seconds);
 
         PreTickManagers(tick_ctxt);
         for (int32 i = 0; i < m_managers.size(); ++i)
@@ -289,53 +292,55 @@ void Engine::RegisterInputBindings()
 	inputAddBindings("bindings_engine", s_input_bindings);
 }
 
-#if 0
-int Engine::HandleEvents(float delta_seconds)
+int Engine::HandleInputs(float delta_seconds)
 {
-    int loop_status = 0;
-    
-    // Handle SDL events & inputs
-    SDL_Event event;
-    const uint8* keys = SDL_GetKeyboardState( nullptr );
+    int status = 0;
+
     uint32 modifiers = 0;
-    if( keys[SDL_SCANCODE_LCTRL] || keys[SDL_SCANCODE_RCTRL] )
-        modifiers |= eIM_Ctrl;
-    if( keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT] )
+    uint8 modifiers_state = inputGetModifiersState();
+    if (0 != (modifiers & (entry::Modifier::LeftShift | entry::Modifier::RightShift)))
+    {
         modifiers |= eIM_Shift;
-    if( keys[SDL_SCANCODE_LALT] || keys[SDL_SCANCODE_RALT] )
+    }
+    if (0 != (modifiers & (entry::Modifier::LeftCtrl | entry::Modifier::RightCtrl)))
+    {
+        modifiers |= eIM_Ctrl;
+    }
+    if (0 != (modifiers & (entry::Modifier::LeftAlt | entry::Modifier::RightAlt)))
+    {
         modifiers |= eIM_Alt;
-    
-    if( keys[SDL_SCANCODE_LEFT] )
+    }
+    //for (int32_t ii = 0; ii < (int32_t)entry::Key::Count; ++ii)
+    //{
+    //    io.KeysDown[ii] = inputGetKeyState(entry::Key::Enum(ii));
+    //}
+
+    if(inputGetKeyState(entry::Key::Left))
         Controller::GetStaticInstance()->OnInputX( modifiers, -delta_seconds );
-    if( keys[SDL_SCANCODE_RIGHT] )
+    if (inputGetKeyState(entry::Key::Right))
         Controller::GetStaticInstance()->OnInputX( modifiers, delta_seconds );
-    if( keys[SDL_SCANCODE_UP] )
+    if (inputGetKeyState(entry::Key::Up))
         Controller::GetStaticInstance()->OnInputY( modifiers, delta_seconds );
-    if( keys[SDL_SCANCODE_DOWN] )
+    if (inputGetKeyState(entry::Key::Down))
         Controller::GetStaticInstance()->OnInputY( modifiers, -delta_seconds );
-    if( keys[SDL_SCANCODE_PAGEUP] || keys[SDL_SCANCODE_U]  )
+    if (inputGetKeyState(entry::Key::PageUp) || inputGetKeyState(entry::Key::KeyU))
         Controller::GetStaticInstance()->OnInputZ( modifiers, delta_seconds );
-    if( keys[SDL_SCANCODE_PAGEDOWN] || keys[SDL_SCANCODE_D]  )
+    if (inputGetKeyState(entry::Key::PageDown) || inputGetKeyState(entry::Key::KeyD))
         Controller::GetStaticInstance()->OnInputZ( modifiers, -delta_seconds );
     
-    //ZZZ
-    //ImGuiIO& io = ImGui::GetIO();
-    //// Setup inputs for imgui
-    //{
-    //    io.MouseWheel = 0;
-    //    io.DeltaTime = bigfx::max(0.000001f, delta_seconds);
-    //    
-    //    int mouse_x, mouse_y;
-    //    uint32 mouse_state = SDL_GetMouseState(&mouse_x, &mouse_y);
-    //    bool left_down = (mouse_state & SDL_BUTTON_LMASK ? true : false);
-    //    bool right_down = (mouse_state & SDL_BUTTON_RMASK ? true : false);
-    //    bool middle_down = (mouse_state & SDL_BUTTON_MMASK ? true : false);
-    //    io.MousePos = ImVec2((float)mouse_x, (float)mouse_y);
-    //    io.MouseDown[0] = left_down;
-    //    io.MouseDown[1] = right_down;
-    //    io.MouseDown[2] = middle_down;
-    //}
+    entry::GamepadHandle handle = { 0 };
+    float left_x = inputGetGamepadAxis(handle, entry::GamepadAxis::LeftX) / 32768.0f;
+    float left_y = inputGetGamepadAxis(handle, entry::GamepadAxis::LeftY) / 32768.0f;
+    if (left_x != 0.f)
+    {
+        Controller::GetStaticInstance()->OnInputX(modifiers, left_x * delta_seconds);
+    }
+    if (left_y != 0.f)
+    {
+        Controller::GetStaticInstance()->OnInputY(modifiers, -left_y * delta_seconds);
+    }
     
+#if 0
     while( SDL_PollEvent( &event ) )
     {
         switch( event.type )
@@ -459,11 +464,10 @@ int Engine::HandleEvents(float delta_seconds)
     //bool controller_right_down = io.MouseDown[1] && !io.MouseDownOwned[1];
     //bool controller_middle_down = io.MouseDown[2] && !io.MouseDownOwned[2];
 	//Controller::GetStaticInstance()->SetMouseState(modifiers, controller_left_down, controller_right_down, controller_middle_down, (int32)io.MousePos.x, (int32)io.MousePos.y);
+#endif
     
-    
-    return loop_status;
+    return status;
 }
-#endif //0
     
 bool Engine::RunCommand( String const& cmd_type, Array<String> const& switches, Array<String> const& tokens )
 {
