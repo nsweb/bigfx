@@ -61,12 +61,15 @@ bool Engine::Init(EngineInitParams const& init_params)
     m_display_mode.width = res_x;
     m_display_mode.height = res_y;
 
-    m_debug = BGFX_DEBUG_NONE;
+    m_debug = BGFX_DEBUG_TEXT;
     m_reset = BGFX_RESET_VSYNC;
 
     bgfx::Init init;
     init.type = args.m_type;
     init.vendorId = args.m_pciId;
+    init.platformData.nwh = entry::getNativeWindowHandle(entry::kDefaultWindowHandle);
+    init.platformData.ndt = entry::getNativeDisplayHandle();
+    init.platformData.type = entry::getNativeWindowHandleType();
     init.resolution.width = res_x;
     init.resolution.height = res_y;
     init.resolution.reset = m_reset;

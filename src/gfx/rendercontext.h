@@ -1,6 +1,4 @@
 
-
-
 #ifndef BB_GFXRENDERCONTEXT_H
 #define BB_GFXRENDERCONTEXT_H
 

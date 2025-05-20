@@ -50,12 +50,13 @@ function createBigfxProject(_bigfxpath)
             }
 
     defines { "_CRT_SECURE_NO_WARNINGS", "JSMN_STATIC", "BX_CONFIG_DEBUG=1", "ENTRY_CONFIG_IMPLEMENT_MAIN=1" } --"_USRDLL",
-    flags { "NoNativeWChar", "NoEditAndContinue", "StaticRuntime", "NoExceptions" }
+    flags { "NoEditAndContinue", "StaticRuntime", "NoExceptions" }
 
     local buildpath = _bigfxpath .. "/build"
     configuration "windows"
         setBigfxTarget( "Debug", "x64", buildpath )
         setBigfxTarget( "Release", "x64", buildpath )
+	buildoptions { "/std:c++latest", "/Zc:__cplusplus", "/Zc:preprocessor"  }
 
     configuration "macosx"
         setBigfxTarget( "Debug", "native", buildpath )
@@ -68,9 +69,6 @@ function createBigfxProject(_bigfxpath)
     configuration "Release"
         defines { "NDEBUG" }
         flags { "Optimize", "Symbols" }
-
-    configuration "macosx"
-        buildoptions { "-std=c++11" } --, "-stdlib=libc++" }
 end
 
 function createBgfxProject(_bgfxpath)

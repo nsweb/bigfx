@@ -830,7 +830,7 @@ template<> mat4 mat4::perspective( float fov_y_deg, float aspect, float zNear, f
 	BB_ASSERT(zFar != zNear);
 
     mat4 result(0.0f);
-    bx::mtxProj(&result[0][0], fov_y_deg, aspect, zNear, zFar, bgfx::getCaps()->homogeneousDepth, bx::Handness::Right);
+    bx::mtxProj(&result[0][0], fov_y_deg, aspect, zNear, zFar, bgfx::getCaps()->homogeneousDepth, bx::Handedness::Right);
 
 	//float tanHalfFovy = tan(fov_y * 0.5f);
 	//mat4 Result(0.0f);

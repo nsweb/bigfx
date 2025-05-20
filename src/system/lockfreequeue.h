@@ -2,6 +2,8 @@
 #ifndef BB_LOCKFREEQUEUE_H
 #define BB_LOCKFREEQUEUE_H 
 
+#if 0 // REBIND
+
 //#include "threadingutils.h"
 
 namespace bigfx
@@ -126,5 +128,6 @@ private:
 
 } /*namespace bigfx*/
 
+#endif // 0
 
 #endif // BB_LOCKFREEQUEUE_H
